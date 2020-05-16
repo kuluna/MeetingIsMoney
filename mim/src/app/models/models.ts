@@ -8,6 +8,7 @@ export interface Summary {
 }
 
 export interface Meet {
+  id: string;
   name: string;
   start: Timestamp;
   end: Timestamp;

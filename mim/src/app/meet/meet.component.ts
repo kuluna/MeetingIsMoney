@@ -8,8 +8,6 @@ import Timestamp = firestore.Timestamp;
 
 import { Meet } from '../models/models';
 import '../models/currency';
-import { Time } from '@angular/common';
-import { stringify } from 'querystring';
 
 @Component({
   selector: 'app-meet',
@@ -29,8 +27,7 @@ export class MeetComponent implements OnInit {
    this.meet = this.route.params.pipe(
       map(params => params['id']),
       tap(id => this.id = id),
-      mergeMap(id => this.getMeeting(id)),
-      tap(meet => console.log(meet))
+      mergeMap(id => this.getMeeting(id))
     );
   }
 
