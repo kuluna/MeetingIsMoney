@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "meetingismoney-app"
+  },
+  "targets": {
+    "meetingismoney-app": {
+      "hosting": {
+        "meeting-is-money": [
+          "meeting-is-money"
+        ]
+      }
+    }
   }
 }

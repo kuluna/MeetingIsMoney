@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { AngularFireFunctions } from '@angular/fire/functions';
 
 @Component({
   selector: 'app-generate',
@@ -7,7 +8,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class GenerateComponent implements OnInit {
 
-  constructor() { }
+  constructor(private functions: AngularFireFunctions) { }
 
   ngOnInit(): void {
   }

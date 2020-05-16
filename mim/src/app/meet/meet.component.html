@@ -1,1 +1,42 @@
-<p>meet works!</p>
+<div *ngIf="(meet | async) as meet">
+  <div *ngIf="meet; else nothing">
+    <h1>{{meet.name}}</h1>
+
+    <div [ngSwitch]="getMeetingState(meet)">
+      <span *ngSwitchCase="'Ready'">現在会議準備中です。</span>
+      <span *ngSwitchCase="'Meeting'">現在会議中です。</span>
+      <span *ngSwitchCase="'Finished'">会議は終了しました。</span>
+    </div>
+
+    <div style="font-size: xx-large;">合計: {{meet.total.toCurrency()}}</div>
+    <div *ngIf="meet.actualStart">開始: {{meet.actualStart.toMillis() | date:'medium'}}</div>
+    <div *ngIf="meet.actualEnd">終了: {{meet.actualStart.toMillis() | date:'medium'}}</div>
+
+    <!-- 予定 -->
+    <h3>日付</h3>
+    <div>開始予定: {{meet.start.toMillis() | date:'medium'}}</div>
+    <div>終了予定: {{meet.end.toMillis() | date:'medium'}}</div>
+    <div>予定時間: {{getMeetingTime(meet.start, meet.end)}}</div>
+    <div style="font-size: large;">
+      予定人件費: {{meet.totalHourlyPay.convertPay(meet.end.toMillis() - meet.start.toMillis()).toCurrency()}}
+      (毎秒{{meet.totalHourlyPay.convertPay(1000).toCurrency()}})
+    </div>
+
+    <!-- Members -->
+    <h3>参加者</h3>
+    <div *ngFor="let member of meet.members">
+      {{member.name}}: 時給
+      <ng-template *ngIf="member.hourly; then showPay else hiddenPay"></ng-template>
+      <ng-template #showPay>{{member.hourly.toCurrency()}}</ng-template>
+      <ng-template #hiddenPay>非公開</ng-template>
+    </div>
+  </div>
+</div>
+
+<ng-template #nothing>
+  <div style="text-align: center;">
+    <h2>ミーティングが見つかりませんでした。</h2>
+    ミーティングIDに間違いがないか確認してください。もしくは不必要なミーティングかもしれません。<br>
+    <span style="font-size: xx-large;">ID: {{id}}</span>
+  </div>
+</ng-template>

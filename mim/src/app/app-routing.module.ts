@@ -8,7 +8,8 @@ import { GenerateComponent } from './generate/generate.component';
 const routes: Routes = [
   { path: '', component: LandingComponent },
   { path: 'meet/:id', component: MeetComponent },
-  { path: 'generate', component: GenerateComponent }
+  { path: 'generate', component: GenerateComponent },
+  { path: '**', redirectTo: '' }
 ];
 
 @NgModule({
