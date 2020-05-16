@@ -16,9 +16,9 @@ export class LandingComponent implements OnInit {
 
   ngOnInit(): void {
       this.summary = this.fireStore.doc<Summary>('total/summary').valueChanges();
+  }
 
-      this.summary.subscribe(value => {
-        console.log(value);
-      });
+  createMeeting() {
+
   }
 }

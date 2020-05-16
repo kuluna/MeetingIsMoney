@@ -1,6 +1,9 @@
-<div style="font-size: xx-large; text-align: center;">
-  世界で{{(summary | async)?.meetings}}回のミーティングが行われました。<br>
-  合計で{{(summary | async)?.times}}分をミーティングに使って<br>
-  実に{{(summary | async)?.amounts}}円もの価値を生み出しました。
+<div style="font-size: xx-large; text-align: center;" *ngIf="(summary | async) as summary;">
+  世界で{{summary.meetings}}回のミーティングが行われました。<br>
+  合計で{{summary.times}}分をミーティングに使って<br>
+  実に{{summary.amounts}}円もの価値を生み出しました。
 </div>
 
+<div style="text-align: center; margin-top: 32px;">
+  <a class="btn btn-primary" routerLink="generate">有意義なミーティングをはじめる</a>
+</div>
