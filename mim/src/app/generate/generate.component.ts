@@ -1,5 +1,5 @@
 import { Component, OnInit, Output, Input } from '@angular/core';
-import {} from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators, ValidatorFn, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AngularFireFunctions } from '@angular/fire/functions';
 import { Member, Meet } from '../models/models';
@@ -10,14 +10,26 @@ import { Member, Meet } from '../models/models';
   styleUrls: ['./generate.component.css']
 })
 export class GenerateComponent implements OnInit {
-  form = new MeetForm(
-    '',
-    [new MemberForm('', 1000)],
-    false,
-    false
-  );
+
+
+  form: FormGroup = this.builder.group({
+    meetingName: ['', Validators.required],
+    start: ['', Validators.required],
+    end: ['', Validators.required],
+    members: this.builder.array([
+      this.builder.group({
+        memberName: ['', Validators.required],
+        hourly: [1000, Validators.min(1)]
+      })
+    ]),
+    hiddenMemberPay: [false],
+    agree: [false, Validators.requiredTrue]
+  }, {
+    validators: validateDate
+  });
 
   constructor(
+    private builder: FormBuilder,
     private route: Router,
     private functions: AngularFireFunctions
     ) { }
@@ -26,53 +38,47 @@ export class GenerateComponent implements OnInit {
   }
 
   sanitize() {
-    this.form.name = this.form.name.trim();
+    this.form.patchValue({
+      meetingName: this.form.value.meetingName.trim()
+    });
+  }
+
+  getMembers(): FormArray {
+    return this.form.get('members') as FormArray;
   }
 
   newMember() {
-    this.form.members.push(new MemberForm('', 1000));
+    this.getMembers().push(
+      this.builder.group({
+        memberName: ['', Validators.required],
+        hourly: [1000, Validators.min(1)]
+      })
+    );
   }
 
   removeMember(index: number) {
-    this.form.members.splice(index, 1);
+    this.getMembers().removeAt(index);
   }
 
   onSubmit() {
-    // const response = this.functions.httpsCallable<MeetForm, Meet>('generate')(this.form);
-    // response.subscribe(meet => {
-    //   this.route.navigate(['/meet', meet.id]);
-    // });
+    const response = this.functions.httpsCallable<any, MeetResponse>('generateMeeting')(this.form.value);
+    response.subscribe(response => {
+      console.log(response.result);
+      this.route.navigate(['/meet', response.result.id]);
+    });
   }
 
-  formJson() { return JSON.stringify(this.form); }
+  formJson() { return JSON.stringify(this.form.value); }
 }
 
-export class MeetForm {
-  start?: string;
-  end?: string;
+export const validateDate: ValidatorFn = (control: FormGroup): ValidationErrors | null => {
+  const start = control.get('start').value;
+  const end = control.get('end').value;
+  const members = (control.get('members') as FormArray).value.length
 
-  constructor(
-    public name: string,
-    public members: Array<MemberForm>,
-    public hiddenMemberPay: boolean,
-    public agree: boolean
-  ){}
+  return (start >= end || members === 0) ? { invalidRange: true } : null;
+};
 
-  invalid(): boolean {
-    if (this.name === '') return true;
-    if (this.start === null) return true;
-    if (this.end === null) return true;
-    if (this.start >= this.end) return true;
-    if (this.members.length === 0) return true;
-    if (!this.agree) return true;
-
-    return false;
-  }
-}
-
-export class MemberForm implements Member {
-  constructor(
-    public name: string,
-    public hourly?: number
-  ) {}
+export interface MeetResponse {
+  result: Meet;
 }
