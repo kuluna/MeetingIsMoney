@@ -36,8 +36,8 @@ export class MeetComponent implements OnInit {
   }
 
   getMeetingState(meet: Meet): MeetingState {
-    if (meet.actualStart !== null) {
-      if (meet.actualEnd !== null) {
+    if (meet.actualStart != null) {
+      if (meet.actualEnd != null) {
         return "Finished";
       } else {
         return "Meeting";

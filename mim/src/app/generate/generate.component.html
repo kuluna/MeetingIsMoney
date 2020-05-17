@@ -1,10 +1,8 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()">
-  {{formJson()}}
-
   <h2>新しい会議</h2>
   <div class="form-group">
     <label for="name">会議名</label>
-    <input type="text" class="form-control" formControlName="meetingName" required minlength="1" (blur)="sanitize()">
+    <input type="text" class="form-control" formControlName="name" required minlength="1" (blur)="sanitize()">
   </div>
 
   <div class="form-group">
@@ -49,5 +47,5 @@
       <label for="agree">この会議を有意義なものにします</label>
     </div>
   </div>
-  <button type="submit" [disabled]="form.invalid" class="btn btn-primary">会議を作る</button>
+  <button type="submit" [disabled]="form.invalid || requesting" class="btn btn-primary">会議を作る</button>
 </form>

@@ -1,8 +1,7 @@
-import { Component, OnInit, Output, Input } from '@angular/core';
+import { Component, OnInit, NgZone } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators, ValidatorFn, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AngularFireFunctions } from '@angular/fire/functions';
-import { Member, Meet } from '../models/models';
 
 @Component({
   selector: 'app-generate',
@@ -10,10 +9,10 @@ import { Member, Meet } from '../models/models';
   styleUrls: ['./generate.component.css']
 })
 export class GenerateComponent implements OnInit {
-
+  requesting: boolean;
 
   form: FormGroup = this.builder.group({
-    meetingName: ['', Validators.required],
+    name: ['', Validators.required],
     start: ['', Validators.required],
     end: ['', Validators.required],
     members: this.builder.array([
@@ -30,6 +29,7 @@ export class GenerateComponent implements OnInit {
 
   constructor(
     private builder: FormBuilder,
+    private ngZone: NgZone,
     private route: Router,
     private functions: AngularFireFunctions
     ) { }
@@ -39,7 +39,7 @@ export class GenerateComponent implements OnInit {
 
   sanitize() {
     this.form.patchValue({
-      meetingName: this.form.value.meetingName.trim()
+      name: this.form.value.name.trim()
     });
   }
 
@@ -61,14 +61,18 @@ export class GenerateComponent implements OnInit {
   }
 
   onSubmit() {
-    const response = this.functions.httpsCallable<any, MeetResponse>('generateMeeting')(this.form.value);
-    response.subscribe(response => {
-      console.log(response.result);
-      this.route.navigate(['/meet', response.result.id]);
+    this.requesting = true;
+
+    // 日付をミリ秒形式に書き換え
+    const value = this.form.value;
+    value.start = new Date(value.start).getTime();
+    value.end = new Date(value.end).getTime();
+    const response = this.functions.httpsCallable<any, string>('generateMeeting')(value);
+    response.subscribe(meetId => {
+      console.log(meetId);
+      this.ngZone.run(() => this.route.navigate(['/meet', meetId]));
     });
   }
-
-  formJson() { return JSON.stringify(this.form.value); }
 }
 
 export const validateDate: ValidatorFn = (control: FormGroup): ValidationErrors | null => {
@@ -78,7 +82,3 @@ export const validateDate: ValidatorFn = (control: FormGroup): ValidationErrors 
 
   return (start >= end || members === 0) ? { invalidRange: true } : null;
 };
-
-export interface MeetResponse {
-  result: Meet;
-}
