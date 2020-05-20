@@ -7,8 +7,9 @@ import { Observable } from 'rxjs';
 import { map, mergeMap, tap } from 'rxjs/operators';
 import Timestamp = firestore.Timestamp;
 
-import { Meet, ManageForm } from '../models/models';
 import '../models/currency';
+import { Meet, ManageForm } from '../models/models';
+import { NavigatorShareService } from '../services/navigator-share.service';
 
 @Component({
   selector: 'app-meet',
@@ -20,14 +21,17 @@ export class MeetComponent implements OnInit {
   meet: Observable<Meet>;
   time: string;
   total: number = 0;
+
   loading: boolean = true;
+  canShare: boolean = false;
 
   timerCounter: any;
 
   constructor(
     private route: ActivatedRoute,
     private fireStore: AngularFirestore,
-    private functions: AngularFireFunctions
+    private functions: AngularFireFunctions,
+    private navigatorShare: NavigatorShareService
   ) { }
 
   ngOnInit(): void {
@@ -58,6 +62,9 @@ export class MeetComponent implements OnInit {
         }
       }
     });
+
+    // シェアAPIが使えるならシェアボタンを表示する
+    this.canShare =this.navigatorShare.canShare();
   }
 
   getMeeting(id: string): Observable<Meet> {
@@ -110,6 +117,16 @@ export class MeetComponent implements OnInit {
     };
     const response = this.functions.httpsCallable<ManageForm, any>("manageMeeting")(requestForm);
     response.subscribe();
+  }
+
+  share() {
+    this.meet.subscribe(meet => {
+      this.navigatorShare.share({
+        title: 'Meeting is Money',
+        text: `${meet.name}の会議`,
+        url: window.location.href
+      });
+    });
   }
 }
 

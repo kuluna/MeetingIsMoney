@@ -1,52 +1,82 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()">
-  <h2>新しい会議</h2>
-  <div class="form-group">
-    <label for="name">会議名</label>
-    <input type="text" class="form-control" formControlName="name" required minlength="1" (blur)="sanitize()">
-  </div>
-
-  <div class="form-group">
-    <label for="start">開始時間</label>
-    <input type="datetime-local" class="form-control" formControlName="start" required>
-  </div>
-
-  <div class="form-group">
-    <label for="end">終了時間</label>
-    <input type="datetime-local" class="form-control" formControlName="end" required>
-  </div>
-
-  <h2>メンバー</h2>
-  <div formArrayName="members">
-    <div *ngFor="let member of getMembers().controls; index as i;">
-      <div [formGroupName]="i">
+<div class="container">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" style="margin-bottom: 16px;">
+    <div class="card">
+      <div class="card-header">
+        <h2>新しい会議</h2>
+      </div>
+      <div class="card-body">
         <div class="form-group">
-          <label for="end">名前</label>
-          <input type="text" class="form-control" formControlName="memberName" required>
+          <label for="name">会議名</label>
+          <input type="text" class="form-control" formControlName="name" required minlength="1" (blur)="sanitize()">
         </div>
-        <div class="form-group">
-          <label for="end">時給</label>
-          <input type="number" class="form-control" formControlName="hourly" min="1">
+
+        <div class="row">
+          <div class="form-group col-md-6">
+            <label for="start">開始時間 (yyyy/MM/dd HH:mm)</label>
+            <input type="datetime-local" class="form-control" formControlName="start" required>
+          </div>
+
+          <div class="form-group col-md-6">
+            <label for="end">終了時間 (yyyy/MM/dd HH:mm)</label>
+            <input type="datetime-local" class="form-control" formControlName="end" required>
+          </div>
         </div>
-        <button type="button" (click)="removeMember(i)" class="btn btn-outline-danger">削除</button>
+      </div>
+
+      <div class="card-header">
+        <h2>メンバー</h2>
+      </div>
+      <div class="card-body">
+        <div formArrayName="members">
+          <div *ngFor="let member of getMembers().controls; index as i;">
+            <div [formGroupName]="i" class="row align-items-end">
+              <div class="form-group col-md-5">
+                <label for="end">名前</label>
+                <input type="text" class="form-control" formControlName="memberName" required>
+              </div>
+              <div class="form-group col-md-5">
+                <label for="end">時給(円)</label>
+                <input type="number" class="form-control" formControlName="hourly" min="1">
+              </div>
+              <div class="col-md-2" style="text-align: end;">
+                <button type="button" (click)="removeMember(i)" class="btn btn-outline-danger" style="margin-bottom: 16px;">削除</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" (click)="newMember()" class="btn btn-secondary">メンバーを追加</button>
       </div>
     </div>
-  </div>
+    <!-- (後から追加もできます) -->
 
-  <button type="button" (click)="newMember()" class="btn btn-secondary">メンバーを追加</button>
-  <!-- (後から追加もできます) -->
+    <!-- <div class="form-group">
+      <div class="form-check">
+        <input type="checkbox" class="form-check-input" formControlName="hiddenMemberPay">
+        <label for="hiddenMemberPay">時給を隠す</label>
+      </div>
+    </div> -->
 
-  <!-- <div class="form-group">
-    <div class="form-check">
-      <input type="checkbox" class="form-check-input" formControlName="hiddenMemberPay">
-      <label for="hiddenMemberPay">時給を隠す</label>
+    <div class="form-group row justify-content-center" style="margin-top: 32px;margin-left: 2px;margin-right: 2px;">
+      <div class="form-check col-12">
+        <input type="checkbox" class="form-check-input" formControlName="agree" id="agree" required>
+        <label for="agree">この会議を有意義なものにします</label>
+      </div>
     </div>
-  </div> -->
-
-  <div class="form-group">
-    <div class="form-check">
-      <input type="checkbox" class="form-check-input" formControlName="agree" required>
-      <label for="agree">この会議を有意義なものにします</label>
+    <div class="row justify-content-center" style="margin-left: 2px;margin-right: 2px;">
+      <button type="submit" [disabled]="form.invalid || requesting" class="btn btn-primary col-12">会議を作る</button>
     </div>
+
+    <div style="text-align: center;" *ngIf="requesting">
+      作成しています...
+      <div class="progress" style="margin-top: 4px;height: 8px;">
+        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+      </div>
+    </div>
+  </form>
+
+  <div style="margin-top: 64px;margin-bottom: 32px;" *ngIf="!requesting">
+    会議が不要になりましたか？それはとてもいいことです！ではTOPに戻って世界でどれだけ会議が行われているのか眺めてみましょう。<br>
+    <a routerLink="/">TOPに戻る</a>
   </div>
-  <button type="submit" [disabled]="form.invalid || requesting" class="btn btn-primary">会議を作る</button>
-</form>
+</div>

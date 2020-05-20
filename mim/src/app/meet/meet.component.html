@@ -1,6 +1,11 @@
-<div *ngIf="(meet | async) as meet">
+<div class="container" *ngIf="(meet | async) as meet">
   <div *ngIf="meet; else nothing">
-    <h1>{{meet.name}}</h1>
+    <div class="row align-items-center">
+      <h1 class="col">{{meet.name}}</h1>
+      <div class="col col-auto" *ngIf="canShare">
+        <button (click)="share()" class="btn btn-info">シェア</button>
+      </div>
+    </div>
 
     <div [ngSwitch]="getMeetingState(meet)">
       <span *ngSwitchCase="'Ready'">現在会議準備中です。</span>
@@ -9,33 +14,51 @@
     </div>
 
     <div [ngSwitch]="getMeetingState(meet)">
-      <button *ngSwitchCase="'Ready'" (click)="startMeeting()" [disabled]="loading" class="btn btn-primary">会議を始める</button>
+      <button *ngSwitchCase="'Ready'" (click)="startMeeting()" [disabled]="loading" class="btn btn-primary">会議をはじめる</button>
       <button *ngSwitchCase="'Meeting'" (click)="endMeeting()" [disabled]="loading" class="btn btn-danger">会議を終了する</button>
     </div>
 
-    <div style="font-size: xx-large;">合計: {{total.toCurrency()}}</div>
+    <div style="margin-top: 16px;">
+      <span style="font-size: x-large;">合計: </span>
+      <span class="display-4">{{total.toCurrency()}}</span>
+    </div>
+
     <div *ngIf="meet.actualStart">時間: {{time}}</div>
     <div *ngIf="meet.actualStart">開始: {{meet.actualStart.toMillis() | date:'medium'}}</div>
-    <div *ngIf="meet.actualEnd">終了: {{meet.actualStart.toMillis() | date:'medium'}}</div>
+    <div *ngIf="meet.actualEnd">終了: {{meet.actualEnd.toMillis() | date:'medium'}}</div>
 
     <!-- 予定 -->
-    <h3>日付</h3>
-    <div>開始予定: {{meet.start.toMillis() | date:'medium'}}</div>
-    <div>終了予定: {{meet.end.toMillis() | date:'medium'}}</div>
-    <div>予定時間: {{getMeetingTime(meet.start, meet.end)}}</div>
-    <div style="font-size: large;">
-      予定人件費: {{meet.totalHourlyPay.convertPay(meet.end.toMillis() - meet.start.toMillis()).toCurrency()}}
-      (毎秒{{meet.totalHourlyPay.convertPay(1000).toCurrency()}})
+    <div class="row">
+      <div class="col-md-10">
+
+        <div class="card" style="margin-top: 32px;">
+          <div>
+            <h5 class="card-header">予定</h5>
+            <div class="card-body">
+              <h5 class="card-title">日時</h5>
+
+              <div>開始予定: {{meet.start.toMillis() | date:'medium'}}</div>
+              <div>終了予定: {{meet.end.toMillis() | date:'medium'}}</div>
+              <div>予定時間: {{getMeetingTime(meet.start, meet.end)}}</div>
+              <div>
+                予定人件費: {{meet.totalHourlyPay.convertPay(meet.end.toMillis() - meet.start.toMillis()).toCurrency()}}
+                (毎秒{{meet.totalHourlyPay.convertPay(1000).toCurrency()}})
+              </div>
+
+              <h5 class="card-title" style="margin-top: 32px;">参加者</h5>
+              <div *ngFor="let member of meet.members">
+                {{member.name}}: 時給
+                <ng-template *ngIf="member.hourly; then showPay else hiddenPay"></ng-template>
+                <ng-template #showPay>{{member.hourly.toCurrency()}}</ng-template>
+                <ng-template #hiddenPay>非公開</ng-template>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
 
-    <!-- Members -->
-    <h3>参加者</h3>
-    <div *ngFor="let member of meet.members">
-      {{member.name}}: 時給
-      <ng-template *ngIf="member.hourly; then showPay else hiddenPay"></ng-template>
-      <ng-template #showPay>{{member.hourly.toCurrency()}}</ng-template>
-      <ng-template #hiddenPay>非公開</ng-template>
-    </div>
   </div>
 </div>
 
@@ -47,5 +70,6 @@
   </div>
 </ng-template>
 
-
-<a routerLink="/" class="btn btn-info">TOPに戻る</a>
+<div class="container" style="margin-top: 36px;margin-bottom: 16px;">
+  <a routerLink="/" class="btn btn-link">TOPに戻る</a>
+</div>
