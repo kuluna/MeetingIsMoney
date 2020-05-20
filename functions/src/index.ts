@@ -37,6 +37,38 @@ export function convertModel(id: string, form: MeetForm): Meet {
   }
 }
 
+export const manageMeeting = functions.https.onCall(async (data, context) => {
+  const body = data as ManageForm;
+  if (body.request === 'Start') {
+    // ミリ秒を切り捨てた現在時刻を挿入
+    const now = Timestamp.fromMillis((new Date().getTime() / 1000) * 1000);
+    await db.doc(`meet/${body.id}`).update({
+      actualStart: now
+    });
+  }
+
+  if (body.request === 'End') {
+    const meet = db.doc(`meet/${body.id}`);
+
+    const meetData = ((await meet.get()).data() as Meet);
+    // ミリ秒を切り捨てた現在時刻を挿入
+    const now = Timestamp.fromMillis((new Date().getTime() / 1000) * 1000);
+    // totalコストと時間を計算する
+    const totalSeconds = (now.toMillis() - meetData.actualStart!.toMillis()) / 1000;
+    const total = Math.floor(totalSeconds * meetData.totalHourlyPay / 3600)
+
+    await meet.update({
+      actualEnd: now,
+      total: total
+    });
+
+    const newData = (await meet.get()).data();
+  return newData;
+  }
+
+  return 'OK';
+});
+
 export interface MeetForm {
   name: string;
   start: number;
@@ -67,3 +99,10 @@ export interface Member {
   name: string
   hourly?: number;
 }
+
+export interface ManageForm {
+  request: ManageRequest;
+  id: string;
+}
+
+export type ManageRequest = 'Start' | 'End';

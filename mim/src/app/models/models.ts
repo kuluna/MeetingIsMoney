@@ -24,3 +24,10 @@ export interface Member {
   name: string;
   hourly?: number;
 }
+
+export interface ManageForm {
+  request: ManageRequest;
+  id: string;
+}
+
+export type ManageRequest = 'Start' | 'End';

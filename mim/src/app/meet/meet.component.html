@@ -8,7 +8,13 @@
       <span *ngSwitchCase="'Finished'">会議は終了しました。</span>
     </div>
 
-    <div style="font-size: xx-large;">合計: {{meet.total.toCurrency()}}</div>
+    <div [ngSwitch]="getMeetingState(meet)">
+      <button *ngSwitchCase="'Ready'" (click)="startMeeting()" [disabled]="loading" class="btn btn-primary">会議を始める</button>
+      <button *ngSwitchCase="'Meeting'" (click)="endMeeting()" [disabled]="loading" class="btn btn-danger">会議を終了する</button>
+    </div>
+
+    <div style="font-size: xx-large;">合計: {{total.toCurrency()}}</div>
+    <div *ngIf="meet.actualStart">時間: {{time}}</div>
     <div *ngIf="meet.actualStart">開始: {{meet.actualStart.toMillis() | date:'medium'}}</div>
     <div *ngIf="meet.actualEnd">終了: {{meet.actualStart.toMillis() | date:'medium'}}</div>
 
@@ -42,4 +48,4 @@
 </ng-template>
 
 
-<a routerLink="/" class="btn btn-primary">TOPに戻る</a>
+<a routerLink="/" class="btn btn-info">TOPに戻る</a>

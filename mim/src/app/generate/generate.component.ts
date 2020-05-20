@@ -69,7 +69,6 @@ export class GenerateComponent implements OnInit {
     value.end = new Date(value.end).getTime();
     const response = this.functions.httpsCallable<any, string>('generateMeeting')(value);
     response.subscribe(meetId => {
-      console.log(meetId);
       this.ngZone.run(() => this.route.navigate(['/meet', meetId]));
     });
   }
