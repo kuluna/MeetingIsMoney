@@ -6,6 +6,7 @@ import { AppRoutingModule } from './app-routing.module';
 import localeJA from '@angular/common/locales/ja'
 
 import { AngularFireModule } from '@angular/fire';
+import { AngularFireAnalyticsModule } from '@angular/fire/analytics';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import { AngularFireFunctionsModule } from '@angular/fire/functions';
 
@@ -29,6 +30,7 @@ registerLocaleData(localeJA);
     AppRoutingModule,
     ReactiveFormsModule,
     AngularFireModule.initializeApp(environment.firebaseConfig),
+    AngularFireAnalyticsModule,
     AngularFirestoreModule,
     AngularFireFunctionsModule
   ],
