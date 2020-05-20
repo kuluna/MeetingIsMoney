@@ -61,9 +61,6 @@ export const manageMeeting = functions.https.onCall(async (data, context) => {
       actualEnd: now,
       total: total
     });
-
-    const newData = (await meet.get()).data();
-  return newData;
   }
 
   return 'OK';
@@ -106,3 +103,30 @@ export interface ManageForm {
 }
 
 export type ManageRequest = 'Start' | 'End';
+
+export const calcSummary = functions.firestore.document('meet/{id}').onUpdate((change, context) => {
+  const newData = change.after.data() as Meet;
+  if (newData.actualEnd !== undefined) {
+    const summaryRef = db.doc('total/summary');
+    return db.runTransaction(async t => {
+      const total = (await t.get(summaryRef)).data() as Total;
+      total.meetings += 1;
+      total.amounts += newData.total;
+      total.times += Math.ceil((newData.actualEnd!.toMillis() - newData.actualStart!.toMillis()) / 1000 / 60);
+
+      return t.update(summaryRef, {
+        amounts: total.amounts,
+        meetings: total.meetings,
+        times: total.times
+      });
+    });
+  }
+
+  return;
+});
+
+export interface Total {
+  amounts: number;
+  meetings: number;
+  times: number;
+}
